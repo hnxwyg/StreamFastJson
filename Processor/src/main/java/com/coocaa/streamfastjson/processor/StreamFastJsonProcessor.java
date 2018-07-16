@@ -88,7 +88,7 @@ public class StreamFastJsonProcessor extends AbstractProcessor {
         for (Element streamFastJsonElement : streamFastJsonElements) {
             if (!(streamFastJsonElement instanceof TypeElement))
                 continue;
-            String pkg = streamFastJsonElement.getEnclosingElement().asType().toString();
+            String pkg = mElementUtils.getPackageOf(streamFastJsonElement).toString();
             String name = streamFastJsonElement.getSimpleName().toString();
             TypeSpec.Builder clazzTypeBuilder = TypeSpec.classBuilder(name + CLASS_SUFFIX)
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
@@ -122,7 +122,7 @@ public class StreamFastJsonProcessor extends AbstractProcessor {
         parseObject.addStatement("$T object = null;",ClassName.get((TypeElement) element));
         parseObject.beginControlFlow("while(reader.hasNext())");
         parseObject.beginControlFlow("if (object == null)");
-        parseObject.addStatement("object = new TestData()");
+        parseObject.addStatement("object = new $T()",ClassName.get((TypeElement)element));
         parseObject.endControlFlow();
         parseObject.addStatement("key = reader.readString()");
         boolean firstElement = true;
@@ -208,7 +208,6 @@ public class StreamFastJsonProcessor extends AbstractProcessor {
             return true;
         List<TypeMirror> typeMirrors = (List<TypeMirror>) typeElement.getInterfaces();
         for (TypeMirror typeMirror : typeMirrors) {
-            note(typeMirror.toString());
             if (typeMirror.toString().contains(clazz.getName()))
                 return true;
         }

@@ -31,7 +31,6 @@ public class ListProcessor implements ITypeProcessor {
         builder.beginControlFlow("while(" + READER + ".hasNext())");
         builder.beginControlFlow("if(list == null)");
         ElementKind kind = typeUtils.asElement(element.asType()).getKind();
-        note("the kind " + kind);
         if (kind == ElementKind.INTERFACE){
             builder.addStatement("list = new $T()", ArrayList.class);
         }else{

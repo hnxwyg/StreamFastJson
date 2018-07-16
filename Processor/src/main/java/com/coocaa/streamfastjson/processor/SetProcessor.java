@@ -30,7 +30,6 @@ public class SetProcessor implements ITypeProcessor{
         builder.beginControlFlow("while(" + READER + ".hasNext())");
         builder.beginControlFlow("if(set == null)");
         ElementKind kind = typeUtils.asElement(element.asType()).getKind();
-        note("the kind " + kind);
         if (kind == ElementKind.INTERFACE){
             builder.addStatement("set = new $T()", HashSet.class);
         }else{

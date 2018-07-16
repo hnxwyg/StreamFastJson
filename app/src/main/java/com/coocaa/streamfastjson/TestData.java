@@ -26,6 +26,7 @@ public class TestData {
     public Map<TestData,TestData> mapData = null;
     public Set<TestData> setData = null;
     public LinkedList<TestData> linkedList = null;
+    public SubTestData subTestData = null;
 
 
     public static TestData parseObject(StreamReader reader){
@@ -88,4 +89,8 @@ public class TestData {
         return object;
     }
 
+    @StreamFastJson
+    public static class SubTestData{
+        public String title = "";
+    }
 }
