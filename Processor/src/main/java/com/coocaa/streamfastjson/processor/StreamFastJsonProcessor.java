@@ -3,16 +3,13 @@ package com.coocaa.streamfastjson.processor;
 
 import com.alibaba.fastjson.StreamReader;
 import com.coocaa.streamfastjson.annotation.StreamFastJson;
-import com.coocaa.streamfastjson.api.IStreamFastJson;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -31,6 +28,8 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -50,7 +49,7 @@ public class StreamFastJsonProcessor extends AbstractProcessor {
     private HashMap<String,Element> fieldNameMaps = new HashMap<>();
     private Set<Element> processedElement = new HashSet<>();
     private static boolean hasProcess = false;
-    private static final String CLASS_SUFFIX = "_JSON";
+    public static final String CLASS_SUFFIX = "_JSON";
     public static final String PARSE_METHOD = "parseObject";
     public static final String JSON_METHOD = "toJSONString";
     public static final String OBJECT = "object";
@@ -128,27 +127,17 @@ public class StreamFastJsonProcessor extends AbstractProcessor {
         parseObject.addStatement("key = reader.readString()");
         boolean firstElement = true;
         for (Element ele : elementList) {
-//            if (!(ele instanceof VariableElement))
-//                continue;
-//            ITypeProcessor processor = ProcessorFactory.getTypeProcessor(ele.asType().toString());
-//            if (processor != null){
-//                if (firstElement){
-//                    parseObject.beginControlFlow("if(\"$L\".equals(key))",ele.getSimpleName().toString());
-//                    firstElement = false;
-//                }else{
-//                    parseObject.nextControlFlow("else if(\"$L\".equals(key))",ele.getSimpleName().toString());
-//                }
-//                parseObject.addCode(processor.process(ele));
-//            }
-            note(ele.asType().toString());
-            if (ele.asType().toString().contains("List")){
-                note(typeUtils.capture(ele.asType()).toString());
-                note(typeUtils.directSupertypes(ele.asType()).toString());
-                note(typeUtils.erasure(ele.asType()).toString());
-                note(typeUtils.getArrayType(ele.asType()).getComponentType().toString());
-                note(mElementUtils.getBinaryName((TypeElement) typeUtils.asElement(ele.asType())).toString());
-                note(ClassName.get(ele.asType()).getClass().);
-
+            if (!(ele instanceof VariableElement))
+                continue;
+            ITypeProcessor processor = ProcessorFactory.getTypeProcessor(ele);
+            if (processor != null){
+                if (firstElement){
+                    parseObject.beginControlFlow("if(\"$L\".equals(key))",ele.getSimpleName().toString());
+                    firstElement = false;
+                }else{
+                    parseObject.nextControlFlow("else if(\"$L\".equals(key))",ele.getSimpleName().toString());
+                }
+                parseObject.addCode(processor.process(ele));
             }
         }
         if (!firstElement) {
@@ -202,4 +191,25 @@ public class StreamFastJsonProcessor extends AbstractProcessor {
         return false;
     }
 
+    public static String getListGeneric(DeclaredType type){
+        TypeMirror t = type.getTypeArguments().get(0);
+        return t.toString();
+    }
+
+    public static String[] getMapGeneric(DeclaredType type){
+        String[] ss = new String[2];
+        ss[0] = type.getTypeArguments().get(0).toString();
+        ss[1] = type.getTypeArguments().get(1).toString();
+        return ss;
+    }
+    public static boolean isSubOfInterface(Element element,String interName){
+        TypeElement typeElement = (TypeElement) typeUtils.asElement(element.asType());
+        List<TypeMirror> typeMirrors = (List<TypeMirror>) typeElement.getInterfaces();
+        for (TypeMirror typeMirror : typeMirrors) {
+            note(typeMirror.toString());
+            if (interName.equals(typeMirror.toString()))
+                return true;
+        }
+        return false;
+    }
 }

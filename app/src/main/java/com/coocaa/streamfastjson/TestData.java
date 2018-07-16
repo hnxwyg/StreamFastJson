@@ -5,6 +5,7 @@ import com.coocaa.streamfastjson.annotation.StreamFastJson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,10 +19,12 @@ public class TestData {
     public byte byteValue = 'c';
     public short shortValue = 20;
     public char charValue = 'a';
+    public double doubleValue = 11;
     public TestData testData = null;
     public List<TestData> listData = null;
     public Map<TestData,TestData> mapData = null;
     public Set<TestData> setData = null;
+    public LinkedList<TestData> linkedList = null;
 
 
     public static TestData parseObject(StreamReader reader){
@@ -51,6 +54,8 @@ public class TestData {
                 object.shortValue = reader.readInteger().shortValue();
             }else if("charValue".equals(key)){
                 object.charValue = (char)reader.readInteger().intValue();
+            }else if("doubleValue".equals(key)){
+                object.doubleValue = Double.valueOf(reader.readString());
             }else if("testData".equals(key)){
                 object.testData = TestData.parseObject(reader);
             }else if("listData".equals(key)){
