@@ -202,12 +202,14 @@ public class StreamFastJsonProcessor extends AbstractProcessor {
         ss[1] = type.getTypeArguments().get(1).toString();
         return ss;
     }
-    public static boolean isSubOfInterface(Element element,String interName){
+    public static boolean isSubOfInterface(Element element,Class clazz){
         TypeElement typeElement = (TypeElement) typeUtils.asElement(element.asType());
+        if (clazz.getName().equals(typeElement.toString()))
+            return true;
         List<TypeMirror> typeMirrors = (List<TypeMirror>) typeElement.getInterfaces();
         for (TypeMirror typeMirror : typeMirrors) {
             note(typeMirror.toString());
-            if (interName.equals(typeMirror.toString()))
+            if (typeMirror.toString().contains(clazz.getName()))
                 return true;
         }
         return false;

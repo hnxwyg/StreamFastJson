@@ -14,19 +14,19 @@ public class BaseTypeReader{
         switch (typpKind){
             case INT:
                 builder.addStatement("int temp = " + READER + ".readInteger()");
-                break;
+                return builder.build();
             case BYTE:
                 builder.addStatement("byte temp = " + READER + ".readInteger().byteValue()");
-                break;
+                return builder.build();
             case SHORT:
                 builder.addStatement("short temp = " + READER + ".readInteger().shortValue()");
-                break;
+                return builder.build();
             case CHAR:
                 builder.addStatement("char temp = (char)" + READER + ".readInteger().intValue()");
-                break;
+                return builder.build();
             case LONG:
                 builder.addStatement("long temp = " + READER + ".readLong()");
-                break;
+                return builder.build();
             case FLOAT:
             case DOUBLE:
             case BOOLEAN:
@@ -49,14 +49,15 @@ public class BaseTypeReader{
                         .nextControlFlow("catch ($T e)", Exception.class)
                         .addStatement("e.printStackTrace()")
                         .endControlFlow();
-                break;
+                return builder.build();
             case DECLARED:
                 String name = element.asType().toString();
                 if (name.equals("java.lang.String")){
                      builder.addStatement("String temp = " + READER + ".readString()");
+                    return builder.build();
                 }
                 break;
         }
-        return builder.build();
+        return null;
     }
 }

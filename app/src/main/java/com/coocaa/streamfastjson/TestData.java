@@ -22,6 +22,7 @@ public class TestData {
     public double doubleValue = 11;
     public TestData testData = null;
     public List<TestData> listData = null;
+    public List<String> listString = null;
     public Map<TestData,TestData> mapData = null;
     public Set<TestData> setData = null;
     public LinkedList<TestData> linkedList = null;
