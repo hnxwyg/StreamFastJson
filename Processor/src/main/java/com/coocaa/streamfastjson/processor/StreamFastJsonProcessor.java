@@ -129,15 +129,28 @@ public class StreamFastJsonProcessor extends AbstractProcessor {
         for (Element ele : elementList) {
             if (!(ele instanceof VariableElement))
                 continue;
-            ITypeProcessor processor = ProcessorFactory.getTypeProcessor(ele);
-            if (processor != null){
-                if (firstElement){
-                    parseObject.beginControlFlow("if(\"$L\".equals(key))",ele.getSimpleName().toString());
-                    firstElement = false;
-                }else{
-                    parseObject.nextControlFlow("else if(\"$L\".equals(key))",ele.getSimpleName().toString());
+//            ITypeProcessor processor = ProcessorFactory.getTypeProcessor(ele);
+//            if (processor != null){
+//                if (firstElement){
+//                    parseObject.beginControlFlow("if(\"$L\".equals(key))",ele.getSimpleName().toString());
+//                    firstElement = false;
+//                }else{
+//                    parseObject.nextControlFlow("else if(\"$L\".equals(key))",ele.getSimpleName().toString());
+//                }
+//                parseObject.addCode(processor.process(ele));
+//            }
+            if (ele.asType() instanceof DeclaredType){
+                List<TypeMirror> typeMirrors = (List<TypeMirror>) ((DeclaredType)ele.asType()).getTypeArguments();
+                for (TypeMirror typeMirror : typeMirrors) {
+                    note(typeMirror.toString());
+                    if(typeUtils.asElement(typeMirror).asType() instanceof DeclaredType){
+                        DeclaredType declaredType = (DeclaredType) typeUtils.asElement(typeMirror).asType();
+                        List<TypeMirror> typeMirror1 = (List<TypeMirror>)declaredType.getTypeArguments();
+                        for (TypeMirror mirror : typeMirror1) {
+                            note(mirror.toString());
+                        }
+                    }
                 }
-                parseObject.addCode(processor.process(ele));
             }
         }
         if (!firstElement) {
@@ -191,9 +204,9 @@ public class StreamFastJsonProcessor extends AbstractProcessor {
         return false;
     }
 
-    public static String getListGeneric(DeclaredType type){
+    public static TypeMirror getListGeneric(DeclaredType type){
         TypeMirror t = type.getTypeArguments().get(0);
-        return t.toString();
+        return t;
     }
 
     public static String[] getMapGeneric(DeclaredType type){

@@ -5,10 +5,8 @@ import com.coocaa.streamfastjson.annotation.StreamFastJson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @StreamFastJson
 public class TestData {
@@ -24,9 +22,12 @@ public class TestData {
     public List<TestData> listData = null;
     public List<String> listString = null;
     public Map<TestData,TestData> mapData = null;
-    public Set<TestData> setData = null;
-    public LinkedList<TestData> linkedList = null;
-    public SubTestData subTestData = null;
+//    public Set<TestData> setData = null;
+//    public LinkedList<TestData> linkedList = null;
+//    public SubTestData subTestData = null;
+    public List<List<String>> subList = null;
+    public Map<String,List<SubTestData>> mapList = null;
+
 
 
     public static TestData parseObject(StreamReader reader){
