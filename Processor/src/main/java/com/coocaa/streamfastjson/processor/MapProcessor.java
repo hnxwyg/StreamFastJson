@@ -4,34 +4,49 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.OBJECT;
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.PARSE_METHOD;
 import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.READER;
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.getListGeneric;
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.getMapGeneric;
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.mElementUtils;
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.note;
 import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.typeUtils;
 
-public class MapProcessor implements ITypeProcessor{
+public class MapProcessor extends ContainerProcessor {
+
+
+    private String keyName = null;
+    public MapProcessor(DeclaredType type, String objecName) {
+        super(type, objecName);
+    }
+
     @Override
-    public CodeBlock process(Element element) {
-        String name = element.getSimpleName().toString();
-        CodeBlock.Builder builder = CodeBlock.builder();
-        ElementKind kind = typeUtils.asElement(element.asType()).getKind();
+    public void buildBeforeCode() {
+        codeBlockBuilder.addStatement(READER + ".startObject()");
+        codeBlockBuilder.addStatement("$T " + objectName + " = null", ClassName.get(declaredType));
+        codeBlockBuilder.beginControlFlow("while(" + READER + ".hasNext())");
+        codeBlockBuilder.beginControlFlow("if(" + objectName + " == null)");
+        ElementKind kind = typeUtils.asElement(declaredType).getKind();
         if (kind == ElementKind.INTERFACE){
-            builder.addStatement(OBJECT + "." + name + " = new $T()", HashMap.class);
+            codeBlockBuilder.addStatement(objectName + " = new $T()", HashMap.class);
         }else{
-            builder.addStatement(OBJECT + "." + name + " = new $T()", ClassName.get(element.asType()));
+            codeBlockBuilder.addStatement(objectName + " = new $T()", ClassName.get(declaredType));
         }
-        builder.addStatement(READER +".readObject(" + OBJECT + "." + name + ")");
-        return builder.build();
+        codeBlockBuilder.endControlFlow();
+    }
+
+    @Override
+    public void addMiddleCode(CodeBlock codeBlock, String name) {
+        codeBlockBuilder.add(codeBlock);
+        if (keyName == null){
+            keyName = name;
+        }else{
+            codeBlockBuilder.addStatement(objectName + ".put(" + keyName + "," + name + ")");
+        }
+    }
+
+    @Override
+    public void buildAfterCode() {
+        codeBlockBuilder.endControlFlow();
+        codeBlockBuilder.addStatement(READER + ".endObject()");
     }
 }

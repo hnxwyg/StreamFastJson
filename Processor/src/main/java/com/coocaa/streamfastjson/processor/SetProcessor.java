@@ -5,50 +5,43 @@ import com.squareup.javapoet.CodeBlock;
 
 import java.util.HashSet;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.OBJECT;
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.PARSE_METHOD;
 import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.READER;
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.getListGeneric;
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.mElementUtils;
 import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.typeUtils;
 
-public class SetProcessor implements ITypeProcessor{
+public class SetProcessor extends ContainerProcessor{
+    public SetProcessor(DeclaredType type, String objecName) {
+        super(type, objecName);
+    }
+
     @Override
-    public CodeBlock process(Element element) {
-        String name = element.getSimpleName().toString();
-        CodeBlock.Builder builder = CodeBlock.builder();
-        builder.addStatement(READER + ".startArray()");
-        TypeMirror typeMirror = getListGeneric((DeclaredType) element.asType());
-        String genericName = typeMirror.toString();
-        builder.addStatement("$T set = null", ClassName.get(element.asType()));
-        builder.beginControlFlow("while(" + READER + ".hasNext())");
-        builder.beginControlFlow("if(set == null)");
-        ElementKind kind = typeUtils.asElement(element.asType()).getKind();
+    public void buildBeforeCode() {
+        codeBlockBuilder.addStatement(READER + ".startArray()");
+        codeBlockBuilder.addStatement("$T " + objectName + " = null", ClassName.get(declaredType));
+        codeBlockBuilder.beginControlFlow("while(" + READER + ".hasNext())");
+        codeBlockBuilder.beginControlFlow("if(" + objectName + " == null)");
+        ElementKind kind = typeUtils.asElement(declaredType).getKind();
         if (kind == ElementKind.INTERFACE){
-            builder.addStatement("set = new $T()", HashSet.class);
+            codeBlockBuilder.addStatement(objectName + " = new $T()", HashSet.class);
         }else{
-            builder.addStatement("set = new $T()", ClassName.get(element.asType()));
+            codeBlockBuilder.addStatement(objectName + " = new $T()", ClassName.get(declaredType));
         }
-        builder.endControlFlow();
-        TypeElement ele = mElementUtils.getTypeElement(genericName);
-        CodeBlock block = BaseTypeReader.getReaderCode(typeUtils.asElement(ele.asType()));
-        if (block != null){
-            builder.add(block);
-            builder.addStatement("set.add(temp)");
-        }else{
-            builder.addStatement("$T temp = $T." + PARSE_METHOD + "(" + READER + ")",
-                    ClassName.get(ele),ClassName.get(ele));
-            builder.addStatement("set.add(temp)");
-        }
-        builder.endControlFlow();
-        builder.addStatement(OBJECT + "." + name + " = set");
-        builder.addStatement(READER + ".endArray()");
-        return builder.build();
+        codeBlockBuilder.endControlFlow();
+    }
+
+    @Override
+    public void addMiddleCode(CodeBlock codeBlock, String name) {
+        codeBlockBuilder.add(codeBlock);
+        codeBlockBuilder.beginControlFlow("if(" + name + " != null)");
+        codeBlockBuilder.addStatement(objectName + ".add(" + name + ")");
+        codeBlockBuilder.endControlFlow();
+    }
+
+    @Override
+    public void buildAfterCode() {
+        codeBlockBuilder.endControlFlow();
+        codeBlockBuilder.addStatement(READER + ".endArray()");
     }
 }

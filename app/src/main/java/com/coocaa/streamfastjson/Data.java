@@ -16,6 +16,7 @@ public class Data {
         dataList.add(new ArrayList<SubData>());
         dataList.get(0).add(new SubData());
         mapData.put(title,dataList.get(0));
+
     }
 
     public static Data parseJSON(JSONReader reader){

@@ -12,7 +12,7 @@ public class CastTypeProcessor implements ITypeProcessor{
     @Override
     public CodeBlock process(Element element) {
         String name = element.getSimpleName().toString();
-        TypeKind kind = element.asType().getKind();
+        TypeKind kind = ElementUtils.getTypeKind(element);
         String type = "";
         switch (kind){
             case FLOAT:

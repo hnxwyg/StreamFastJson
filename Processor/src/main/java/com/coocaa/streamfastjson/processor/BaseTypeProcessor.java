@@ -11,8 +11,8 @@ public class BaseTypeProcessor implements ITypeProcessor {
     public CodeBlock process(Element element) {
         String name = element.getSimpleName().toString();
         CodeBlock.Builder builder = CodeBlock.builder();
-        builder.add(BaseTypeReader.getReaderCode(element));
-        builder.addStatement(OBJECT + "." + name + " = temp");
+        builder.add(BaseTypeReader.getReaderCode(element,"object1"));
+        builder.addStatement(OBJECT + "." + name + " = object1");
         return builder.build();
     }
 }

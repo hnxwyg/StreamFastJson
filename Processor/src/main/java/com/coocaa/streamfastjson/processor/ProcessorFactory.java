@@ -1,19 +1,13 @@
 package com.coocaa.streamfastjson.processor;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeKind;
-
-import static com.coocaa.streamfastjson.processor.StreamFastJsonProcessor.isSubOfInterface;
 
 public class ProcessorFactory {
 
 
     public static ITypeProcessor getTypeProcessor(Element element){
-        TypeKind typpKind = element.asType().getKind();
+        TypeKind typpKind = ElementUtils.getTypeKind(element);
         switch (typpKind){
             case INT:
             case LONG:
@@ -24,19 +18,15 @@ public class ProcessorFactory {
             case DOUBLE:
             case BOOLEAN:
                 return new BaseTypeProcessor();
-            case ARRAY:return null;
+            case ARRAY:
+                return new ArrayProcessor();
             case DECLARED:
                 String name = element.asType().toString();
                 if (name.equals("java.lang.String")){
                     return new BaseTypeProcessor();
-                }else if(isSubOfInterface(element, List.class)){
-                    return new ListProcessor();
-                }else if(isSubOfInterface(element,Set.class)){
-                    return new SetProcessor();
-                }else if(isSubOfInterface(element,Map.class)){
-                    return new MapProcessor();
+                }else {
+                    return new DeclaredTypeProcessor();
                 }
-                return new ObjectProcessor();
             default:
                 return null;
         }
